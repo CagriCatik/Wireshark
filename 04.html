@@ -1,0 +1,309 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Where to Capture Network Traffic and How</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="01.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="02.html"><strong aria-hidden="true">2.</strong> How to Capture Network Traffic</a></li><li class="chapter-item expanded "><a href="03.html"><strong aria-hidden="true">3.</strong> Capturing Packets with Dumpcap</a></li><li class="chapter-item expanded "><a href="04.html" class="active"><strong aria-hidden="true">4.</strong> Where to Capture Network Traffic and How</a></li><li class="chapter-item expanded "><a href="05.html"><strong aria-hidden="true">5.</strong> How to Filter Traffic</a></li><li class="chapter-item expanded "><a href="06.html"><strong aria-hidden="true">6.</strong> Name Resolution</a></li><li class="chapter-item expanded "><a href="07.html"><strong aria-hidden="true">7.</strong> Utilizing the Time Column</a></li><li class="chapter-item expanded "><a href="08.html"><strong aria-hidden="true">8.</strong> Reading PCAPs with Wireshark Statistics</a></li><li class="chapter-item expanded "><a href="09.html"><strong aria-hidden="true">9.</strong> Extracting Files from PCAPs with Wireshark</a></li><li class="chapter-item expanded "><a href="10.html"><strong aria-hidden="true">10.</strong> Map IP Address Locations with Wireshark Using GeoIP</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="where-to-capture-network-traffic-and-how"><a class="header" href="#where-to-capture-network-traffic-and-how">Where to Capture Network Traffic and How</a></h1>
+<h2 id="introduction"><a class="header" href="#introduction">Introduction</a></h2>
+<p>Network traffic analysis using Wireshark is a critical skill for network administrators, cybersecurity professionals, and IT specialists. Wireshark, a robust network protocol analyzer, allows users to capture and interactively browse the traffic running on a computer network. A pivotal aspect of using Wireshark effectively involves understanding <em>where</em> to capture network traffic and the methodologies associated with capturing it. This tutorial provides a comprehensive guide on how to strategically determine capture points within a network and discusses the implications of these choices.</p>
+<h2 id="1-defining-the-problem"><a class="header" href="#1-defining-the-problem">1. Defining the Problem</a></h2>
+<p>Before capturing network traffic, it is essential to define the problem you are trying to analyze. The decision on where to place your capture points hinges on the nature of the issue. For example, troubleshooting a connectivity problem for a single client differs significantly from investigating a widespread security incident affecting an entire network segment.</p>
+<h3 id="11-single-client-connectivity-issues"><a class="header" href="#11-single-client-connectivity-issues">1.1 Single Client Connectivity Issues</a></h3>
+<p>When a single client experiences connectivity problems, the focus should be on capturing traffic close to the client and its communication path to the server. The goal is to determine if the problem originates from the client, the network path, or the server.</p>
+<h3 id="12-network-wide-security-incidents"><a class="header" href="#12-network-wide-security-incidents">1.2 Network-wide Security Incidents</a></h3>
+<p>In contrast, if you are dealing with a security breach affecting multiple segments of a network, a broader capture strategy is required. This might involve capturing traffic at the network's perimeter, such as at the firewall or edge router, to monitor ingress and egress traffic comprehensively.</p>
+<h2 id="2-capture-point-considerations"><a class="header" href="#2-capture-point-considerations">2. Capture Point Considerations</a></h2>
+<h3 id="21-client-side-capture"><a class="header" href="#21-client-side-capture">2.1 Client-Side Capture</a></h3>
+<p>In scenarios where the issue is isolated to a single client or a small group of clients, a logical first step is to capture traffic on the client side. For instance, if the client is connected via Wi-Fi, capturing traffic at or near the access point can provide insights into the wireless environment, potential interference, and the client's interaction with the network.</p>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Direct visibility into the client’s network traffic.</li>
+<li>Can help identify client-specific issues such as DHCP failures, DNS resolution problems, or Wi-Fi connectivity issues.</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Capturing directly on the client may introduce slight overhead, potentially affecting performance.</li>
+<li>Capturing from the client perspective may not provide complete visibility into the network path.</li>
+</ul>
+<h3 id="22-network-level-capture"><a class="header" href="#22-network-level-capture">2.2 Network-Level Capture</a></h3>
+<p>When client-side capture does not provide sufficient insight, or when multiple clients are affected, network-level capture becomes necessary. The preferred method in these scenarios is to use network taps or port mirroring (SPAN/RSPAN) on switches and routers.</p>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Provides visibility into the network path between the client and server.</li>
+<li>Allows for the capture of all traffic passing through the capture point, enabling a comprehensive analysis.</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Requires access to network infrastructure (e.g., switches, routers).</li>
+<li>May involve complex configuration and potential network disruptions during setup.</li>
+</ul>
+<h3 id="23-server-side-capture"><a class="header" href="#23-server-side-capture">2.3 Server-Side Capture</a></h3>
+<p>Capturing traffic on the server side can offer invaluable information, particularly when investigating issues such as application performance or server-side processing delays. However, this method comes with several caveats.</p>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Direct insight into server responses and interactions with clients.</li>
+<li>Useful for analyzing server-side processes and backend communications.</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Capturing directly on a server can be resource-intensive, potentially affecting server performance.</li>
+<li>In environments where servers are virtualized or hosted in the cloud (e.g., AWS), obtaining server-side captures may be challenging or require additional tools (e.g., virtual taps or spans).</li>
+</ul>
+<h3 id="24-cloud-and-virtualized-environments"><a class="header" href="#24-cloud-and-virtualized-environments">2.4 Cloud and Virtualized Environments</a></h3>
+<p>In cloud environments, traditional capture methods may not be feasible. For instance, capturing traffic from an AWS-hosted instance requires different approaches, such as using virtual network interfaces (VNICs) or AWS VPC traffic mirroring.</p>
+<p><strong>Key Considerations:</strong></p>
+<ul>
+<li>Understand the limitations of cloud-based networking tools.</li>
+<li>Ensure compliance with cloud service provider policies regarding traffic inspection and capture.</li>
+<li>Consider the potential need for third-party tools or services that integrate with cloud environments.</li>
+</ul>
+<h2 id="3-practical-capture-strategies"><a class="header" href="#3-practical-capture-strategies">3. Practical Capture Strategies</a></h2>
+<h3 id="31-multi-point-capture-strategy"><a class="header" href="#31-multi-point-capture-strategy">3.1 Multi-Point Capture Strategy</a></h3>
+<p>For complex issues, particularly those involving multiple network segments, capturing traffic from multiple vantage points simultaneously provides a comprehensive view. For example, capturing on both the client and server sides allows for correlation of traffic flows, timing analysis, and identification of discrepancies between what the client sends and what the server receives.</p>
+<h3 id="32-tap-vs-span"><a class="header" href="#32-tap-vs-span">3.2 TAP vs. SPAN</a></h3>
+<p>When physical access to the network infrastructure is available, using a TAP (Terminal Access Point) or a SPAN (Switched Port Analyzer) port can be effective. A TAP is a hardware device that allows traffic to be monitored without impacting network performance, whereas a SPAN port is a feature of network switches that mirrors traffic to a specific port for analysis.</p>
+<p><strong>TAP Advantages:</strong></p>
+<ul>
+<li>Non-intrusive and does not impact the performance of the network devices.</li>
+<li>Provides a true copy of the traffic, including low-level errors.</li>
+</ul>
+<p><strong>SPAN Advantages:</strong></p>
+<ul>
+<li>Easier to deploy as it utilizes existing network hardware.</li>
+<li>Flexible, as it can be configured dynamically via switch management interfaces.</li>
+</ul>
+<p><strong>Considerations:</strong></p>
+<ul>
+<li>SPAN ports can sometimes drop packets under high load, which can skew analysis results.</li>
+<li>TAPs require physical installation, which may not be feasible in all environments.</li>
+</ul>
+<h3 id="33-installing-wireshark-on-endpoints"><a class="header" href="#33-installing-wireshark-on-endpoints">3.3 Installing Wireshark on Endpoints</a></h3>
+<p>In cases where network capture is not possible, installing Wireshark directly on the endpoint (client or server) might be the only option. However, this method should be approached with caution due to potential performance impacts and the limited scope of the capture (i.e., only the traffic visible to that particular endpoint).</p>
+<h2 id="4-conclusion"><a class="header" href="#4-conclusion">4. Conclusion</a></h2>
+<p>Selecting the appropriate capture points for network traffic analysis is a critical decision that significantly impacts the quality and relevance of the data collected. The choice of where to capture should be driven by the specific problem being addressed, the network architecture, and the tools and access available.</p>
+<p>Whenever possible, capturing traffic at multiple points provides the most comprehensive view, enabling detailed analysis and troubleshooting. However, practical constraints such as access to infrastructure, network complexity, and the use of cloud services may necessitate alternative approaches.</p>
+<p>In summary, effective use of Wireshark requires not just an understanding of the tool itself but also a strategic approach to where and how network traffic is captured. Through careful planning and consideration of the factors discussed, professionals can maximize the utility of Wireshark in diagnosing and resolving network issues.</p>
+<hr />
+<p>This tutorial aimed to provide a methodical approach to network traffic capture, emphasizing the importance of strategic planning in selecting capture points. Further lessons will delve deeper into specific configurations and advanced techniques for optimizing traffic analysis with Wireshark.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="03.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="05.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="03.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="05.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

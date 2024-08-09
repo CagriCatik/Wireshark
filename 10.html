@@ -1,0 +1,342 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Map IP Address Locations with Wireshark Using GeoIP</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="01.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="02.html"><strong aria-hidden="true">2.</strong> How to Capture Network Traffic</a></li><li class="chapter-item expanded "><a href="03.html"><strong aria-hidden="true">3.</strong> Capturing Packets with Dumpcap</a></li><li class="chapter-item expanded "><a href="04.html"><strong aria-hidden="true">4.</strong> Where to Capture Network Traffic and How</a></li><li class="chapter-item expanded "><a href="05.html"><strong aria-hidden="true">5.</strong> How to Filter Traffic</a></li><li class="chapter-item expanded "><a href="06.html"><strong aria-hidden="true">6.</strong> Name Resolution</a></li><li class="chapter-item expanded "><a href="07.html"><strong aria-hidden="true">7.</strong> Utilizing the Time Column</a></li><li class="chapter-item expanded "><a href="08.html"><strong aria-hidden="true">8.</strong> Reading PCAPs with Wireshark Statistics</a></li><li class="chapter-item expanded "><a href="09.html"><strong aria-hidden="true">9.</strong> Extracting Files from PCAPs with Wireshark</a></li><li class="chapter-item expanded "><a href="10.html" class="active"><strong aria-hidden="true">10.</strong> Map IP Address Locations with Wireshark Using GeoIP</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="map-ip-address-locations-with-wireshark-using-geoip"><a class="header" href="#map-ip-address-locations-with-wireshark-using-geoip">Map IP Address Locations with Wireshark Using GeoIP</a></h1>
+<h2 id="overview"><a class="header" href="#overview">Overview</a></h2>
+<p>In network forensics and cybersecurity, identifying the geographic origin of IP addresses found in packet captures (PCAPs) can provide crucial context for understanding potential threats or anomalies. Wireshark, a powerful network protocol analyzer, offers a feature that allows users to map IP addresses to their geographic locations using GeoIP databases. This tutorial will provide a detailed, step-by-step guide on how to configure and use this feature in Wireshark.</p>
+<h2 id="requirements"><a class="header" href="#requirements">Requirements</a></h2>
+<p>Before proceeding, ensure you have the following prerequisites:</p>
+<ol>
+<li><strong>Wireshark</strong> installed on your system. This tutorial applies to all major operating systems: macOS, Linux, and Windows.</li>
+<li><strong>GeoIP2 databases</strong> from MaxMind. These include the GeoLite2 Country, City, and Autonomous System Number (ASN) databases.</li>
+</ol>
+<h3 id="step-1-downloading-geoip2-databases"><a class="header" href="#step-1-downloading-geoip2-databases">Step 1: Downloading GeoIP2 Databases</a></h3>
+<p>To enable the GeoIP functionality in Wireshark, you first need to download the relevant GeoIP2 databases from MaxMind.</p>
+<ol>
+<li>
+<p><strong>Create a MaxMind account</strong>:</p>
+<ul>
+<li>Visit the <a href="https://www.maxmind.com">MaxMind website</a>.</li>
+<li>Sign up for a free account to gain access to the GeoLite2 databases.</li>
+</ul>
+</li>
+<li>
+<p><strong>Download the databases</strong>:</p>
+<ul>
+<li>Once your account is set up, navigate to the downloads section and download the following databases:
+<ul>
+<li><strong>GeoLite2-Country</strong>: Provides country-level IP address to location mapping.</li>
+<li><strong>GeoLite2-City</strong>: Provides city-level IP address to location mapping, including latitude and longitude.</li>
+<li><strong>GeoLite2-ASN</strong>: Maps IP addresses to their corresponding Autonomous System Numbers, which can identify the network owners.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Extract the databases</strong>:</p>
+<ul>
+<li>After downloading, extract the compressed files into a dedicated folder on your local system. Ensure you know the exact location of this folder, as it will be needed in subsequent steps.</li>
+</ul>
+</li>
+</ol>
+<h3 id="step-2-configuring-wireshark-to-use-geoip-databases"><a class="header" href="#step-2-configuring-wireshark-to-use-geoip-databases">Step 2: Configuring Wireshark to Use GeoIP Databases</a></h3>
+<p>With the GeoIP databases ready, the next step is to configure Wireshark to use them for IP geolocation.</p>
+<ol>
+<li>
+<p><strong>Open Wireshark Preferences</strong>:</p>
+<ul>
+<li>On macOS: Go to the <strong>Wireshark</strong> menu and select <strong>Preferences</strong>.</li>
+<li>On Linux/Windows: Go to the <strong>Edit</strong> menu and select <strong>Preferences</strong>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Navigate to the Name Resolution settings</strong>:</p>
+<ul>
+<li>Within the Preferences window, locate and click on <strong>Name Resolution</strong> in the left-hand panel.</li>
+</ul>
+</li>
+<li>
+<p><strong>Configure the MaxMind Database Directories</strong>:</p>
+<ul>
+<li>At the bottom of the Name Resolution settings, find the section titled <strong>MaxMind Database Directories</strong>.</li>
+<li>Click on the <strong>Edit</strong> button to open the directory configuration.</li>
+<li>Click <strong>Add</strong> (or the plus icon), and navigate to the folder where you extracted the GeoIP databases. Select this folder, ensuring that Wireshark can access the GeoLite2-Country, GeoLite2-City, and GeoLite2-ASN databases.</li>
+</ul>
+</li>
+<li>
+<p><strong>Apply and Save</strong>:</p>
+<ul>
+<li>Once you have pointed Wireshark to the correct directory, click <strong>OK</strong> to save the settings.</li>
+</ul>
+</li>
+</ol>
+<h3 id="step-3-utilizing-geoip-data-in-packet-analysis"><a class="header" href="#step-3-utilizing-geoip-data-in-packet-analysis">Step 3: Utilizing GeoIP Data in Packet Analysis</a></h3>
+<p>With the GeoIP feature enabled, Wireshark can now provide geolocation information for IP addresses captured in your network traffic.</p>
+<ol>
+<li>
+<p><strong>Inspecting IP Information</strong>:</p>
+<ul>
+<li>Capture or open a PCAP file in Wireshark.</li>
+<li>Select a packet containing an IP address (usually found under the Internet Protocol section).</li>
+<li>Expand the IP header in the packet details pane. You should now see additional fields showing the <strong>Country</strong>, <strong>City</strong>, <strong>Autonomous System Number</strong>, and <strong>Latitude/Longitude</strong> for the IP addresses involved.</li>
+</ul>
+</li>
+<li>
+<p><strong>Visualizing IP Locations</strong>:</p>
+<ul>
+<li>Navigate to <strong>Statistics</strong> in the menu and select <strong>Endpoints</strong>.</li>
+<li>In the Endpoints window, choose the <strong>IPv4</strong> or <strong>IPv6</strong> tab, depending on the traffic you are analyzing.</li>
+<li>This view will now include geographic data such as Country, City, and Autonomous System.</li>
+<li>To visualize this information, click on <strong>Map</strong> and choose <strong>Open in Browser</strong>. This action will open a map in your web browser, showing the locations of the IP addresses based on the GeoIP data.</li>
+</ul>
+</li>
+</ol>
+<h3 id="step-4-filtering-traffic-by-geographic-information"><a class="header" href="#step-4-filtering-traffic-by-geographic-information">Step 4: Filtering Traffic by Geographic Information</a></h3>
+<p>Wireshark’s GeoIP integration also allows for advanced filtering based on geolocation data. This can be particularly useful when conducting forensic analysis or investigating potential security incidents.</p>
+<ol>
+<li>
+<p><strong>Creating Location-Based Filters</strong>:</p>
+<ul>
+<li>In the packet list pane, right-click on any packet of interest and select <strong>Prepare as Filter</strong> &gt; <strong>Selected</strong>.</li>
+<li>Wireshark will auto-generate a filter string, which you can modify to include specific geographic criteria. For example:
+<ul>
+<li>To filter all traffic originating from Moscow: <code>ip.geoip.src_city == "Moscow"</code></li>
+<li>To filter by country: <code>ip.geoip.src_country == "RU"</code> (for Russia)</li>
+<li>To filter by ASN: <code>ip.geoip.src_asn == 12345</code> (replace with the specific ASN)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Applying and Saving Filters</strong>:</p>
+<ul>
+<li>Once the filter is set, apply it to see only the relevant traffic.</li>
+<li>You can save these filters for future use by adding them as filter buttons or saving them in your Wireshark profiles.</li>
+</ul>
+</li>
+</ol>
+<h3 id="important-considerations"><a class="header" href="#important-considerations">Important Considerations</a></h3>
+<ul>
+<li><strong>Data Accuracy</strong>: The GeoIP databases are updated periodically by MaxMind. The accuracy of the geolocation data depends on how recently you have updated the databases. Ensure you download the latest versions regularly to maintain accuracy in your analyses.</li>
+<li><strong>Limitations</strong>: Geolocation data is inherently imprecise, especially for IP addresses associated with mobile networks, VPNs, or other proxy services. Use this information as one piece of a larger investigative puzzle, rather than relying on it as definitive evidence.</li>
+</ul>
+<h3 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h3>
+<p>The GeoIP feature in Wireshark provides valuable insights into the geographic origins of IP addresses, which can significantly enhance your network analysis and cybersecurity investigations. By following the steps outlined in this tutorial, you can configure and utilize this powerful feature to map IP addresses in your packet captures, offering a deeper understanding of the traffic traversing your network.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="09.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="09.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
