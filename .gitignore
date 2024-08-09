@@ -1,0 +1,34 @@
+# Lua bytecode
+*.luac
+
+# LuaRocks build files
+*.rock
+*.rockspec
+
+# Nodemcu
+init.lua
+*.lc
+
+# Executable files
+*.exe
+*.out
+*.app
+*.dll
+*.so
+*.dylib
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# IDE files
+.idea/
+.vscode/
+*.code-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+book
